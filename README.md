@@ -1,80 +1,136 @@
-# AI Interaction ABM v5
+# Generative AI as an Interaction Intermediary
 
-This repository contains a compact agent-based model (ABM) for exploring how generative AI may act as an interaction intermediary in collaborative task settings. The model compares peer-first, AI-first and hybrid interaction modes and records how these modes affect task quality, knowledge accumulation, trust, human-interaction retention and performance inequality.
+This repository contains the agent-based model, experiment design, result summaries, and publication figures for the study **“Generative AI as an Interaction Intermediary: Modeling How AI-Mediated Interaction Changes Collaboration, Trust, and Social Learning.”**
 
-## Epistemological position
+Repository URL used in the conference paper:
 
-The model is a **generative and exploratory social simulation**, not a calibrated predictive model of a particular empirical population. Variables such as knowledge, trust, AI literacy and sociability are operational constructs on normalised scales. In particular, the model does not claim that human knowledge is intrinsically scalar; `knowledge` represents task-relevant capability for the abstract collaborative tasks studied here.
+`https://github.com/yakupturgut/generative-ai-interaction-abm`
 
-The choice equations use mode-specific behavioural propensity scores. These are described as utility functions in the paper, but they should be interpreted as bounded-rational propensities rather than welfare utilities. Their purpose is to encode explicit directional assumptions and examine the aggregate consequences of those assumptions.
+## Research question
 
-## What is the task?
+The model examines how repeated problem-solving choices among **Peer-first**, **AI-first**, and **Hybrid** support affect:
 
-Each simulation step represents one repeated **collaborative problem-solving episode**. The task is intentionally abstract because the model is designed to compare interaction regimes rather than model a specific workplace, school or platform. Task difficulty is drawn randomly at each step and affects all interaction modes.
+- task quality and success,
+- knowledge accumulation,
+- trust in AI and peers,
+- social-tie reinforcement and activity,
+- longer-run patterns of AI use and human interaction.
 
-## Files
+System-level interaction patterns arise from heterogeneous agents, task requirements, AI capability and access, peer expertise, social ties, and accumulated experience under a common behavioral and update architecture.
 
-- `model.py`: core ABM implementation and behavioural mechanisms.
-- `experiments.py`: scenario definitions, base settings and sensitivity analysis.
-- `run_simulation.py`: full command-line pipeline for regenerating results and figures.
-- `plots.py`: figure-generation functions.
-- `results/`: CSV outputs generated from the included run.
-- `figures/`: PNG and PDF figures generated from the included run.
-- `ODD_model_description.pdf`: full ODD-style model documentation for review and replication.
-- `MODEL_DOCUMENTATION.md`: compact documentation of assumptions, variables and reproducibility steps.
-- `requirements.txt`: required Python packages.
+## Main model design
 
-## Reproducing the experiment
+Reference configuration:
 
-From this directory, create an environment and install dependencies:
+- **180 agents**
+- **150 repeated task episodes**
+- connected Watts-Strogatz social network
+- three-dimensional agent skill profiles
+- structured, contextual, and integrative task requirement profiles
+- common probabilistic choice equation for Peer-first / AI-first / Hybrid
+- task-specific experience learning
+- AI and partner-specific peer trust updates
+- knowledge learning from practice and novel support information
+- contribution-based tie reinforcement and slow unused-tie decay
+
+The model uses a common route-choice architecture:
+
+`utility = expected task quality + source trust + local social signal - route cost`
+
+and converts feasible route utilities to probabilities with a softmax rule.
+
+## Experiments
+
+The full analysis consists of five blocks:
+
+1. **Reference AI-enabled system vs. Human-only benchmark**  
+   30 paired replications.
+
+2. **Task-route mechanism analysis**  
+   20 replications with detailed task-level records.
+
+3. **Environmental factorial**  
+   3 AI-access levels × 3 AI-reliability levels × 2 verification-support levels × 2 peer-response levels = **36 conditions**, with 20 replications per condition.
+
+4. **AI reliability shock and recovery**  
+   Stable reliability, temporary drop + recovery, and persistent drop; 30 replications per condition.
+
+5. **Mechanism sensitivity**  
+   16 behavioral/update parameters varied by ±20%, with 20 paired replications per setting.
+
+All primary uncertainty intervals are two-sided **95% Student-t confidence intervals** across independent replications.
+
+## Repository structure
+
+```text
+.
+├── model.py                 # Agent, task, choice, outcome, learning and network mechanisms
+├── experiments.py           # Reference, factorial, shock and sensitivity experiments
+├── run_analysis.py          # Complete experiment pipeline
+├── precheck.py              # Small model/mechanism diagnostic
+├── figures.py               # Analysis/output figures
+├── regenerate_figures.py    # Recreate figures from saved CSV results
+├── requirements.txt
+├── docs/
+│   ├── ODD_model_description.md
+│   ├── ODD_model_description.tex
+│   ├── ODD_model_description.pdf
+│   ├── MODEL_PARAMETERS.md
+│   └── REPRODUCIBILITY.md
+├── results/                 # Compact replication-level and summary CSV outputs
+└── figures/                 # Publication/analysis figures in PNG/PDF/SVG
+```
+
+## Installation
+
+Python 3.10+ is recommended.
 
 ```bash
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-# macOS/Linux:
-source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Run the full pipeline:
+## Quick diagnostic
 
 ```bash
-python run_simulation.py
+python precheck.py
+python run_analysis.py --quick
 ```
 
-This will regenerate:
+The quick run checks the full pipeline on a small design. It is not intended for scientific interpretation.
 
-- `results/replication_histories.csv`
-- `results/final_outcomes_by_replication.csv`
-- `results/aggregated_results.csv`
-- `results/sensitivity_results.csv`
-- `results/summary_means.csv`
-- all PNG and PDF figures in `figures/`
+## Full analysis
 
-## Experimental settings
+```bash
+python run_analysis.py
+```
 
-Main experiment:
+The experiment functions are checkpoint-aware. If a long run is interrupted, rerunning the command reuses completed replications already present in the result CSV files.
 
-- 120 agents
-- 60 task episodes
-- 4 scenarios
-- 20 replications per scenario
-- connected Watts-Strogatz small-world network
-- base network density: 0.06
-- fixed seed structure starting from 2026
+## Recreate figures only
 
-Sensitivity analysis:
+```bash
+python regenerate_figures.py
+```
 
-- one-at-a-time sensitivity around the AI-as-complement scenario
-- varied factors: AI reliability, AI convenience, verification strength and network density
-- 6 replications per factor level
-- fixed seed structure starting from 9026
+## Main outcome definitions
 
-## Notes on network size
+- **Human interaction rate** = Peer-first share + Hybrid share.
+- **AI use rate** = AI-first share + Hybrid share.
 
-The default population size is 120 agents. This is within the broad 110--150 range often discussed in relation to Dunbar-type social network arguments. However, agents do not interact with all other agents; the small-world network gives each agent a much smaller local neighbourhood while preserving clustered interaction and some long-range reach.
+These measures overlap because Hybrid uses both AI and another person; they are not complements and do not sum to one.
 
-## No notebooks required
+## Large event-level file
 
-The experiment is fully scripted and does not require Jupyter notebooks. This is intentional: reviewers can recreate the outputs using a single command-line script.
+The full task-level experiment generates `task_mode_agent_events.csv`, which is approximately 179 MB in the reference study and exceeds GitHub's standard per-file size limit. It is intentionally not included in the repository package. The file is regenerated automatically by the task-mechanism experiment when the full analysis is run.
+
+All compact summaries and replication-level files required to inspect the reported findings are included under `results/`.
+
+## Reproducibility notes
+
+- Independent replications use deterministic seed construction.
+- Paired comparisons reuse common replication seeds where appropriate.
+- The Human-only benchmark removes AI availability while preserving the same task, peer, learning, and network mechanisms.
+- Task labels never directly award a route-specific utility or performance bonus.
+- AI-first use does not directly penalize social ties; unused ties decay because they receive fewer opportunities for reinforcement.
+
+See `docs/ODD_model_description.md` and `docs/REPRODUCIBILITY.md` for details.

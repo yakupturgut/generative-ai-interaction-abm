@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+results_quick_test/
+figures_quick_test/
+results/task_mode_agent_events.csv
+.DS_Store
